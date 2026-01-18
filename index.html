@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini AI - GitHub Pages</title>
+    <style>
+        body { font-family: sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; margin: 0; }
+        #chat-container { width: 100%; max-width: 450px; background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: flex; flex-direction: column; height: 90vh; }
+        #header { background: #1a73e8; color: white; padding: 15px; text-align: center; font-weight: bold; border-radius: 15px 15px 0 0; }
+        #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .msg { padding: 10px 15px; border-radius: 15px; max-width: 80%; font-size: 14px; line-height: 1.5; }
+        .user { align-self: flex-start; background: #e3f2fd; color: #0d47a1; }
+        .bot { align-self: flex-end; background: #f1f8e9; color: #1b5e20; white-space: pre-wrap; }
+        #input-area { border-top: 1px solid #eee; padding: 15px; display: flex; gap: 8px; }
+        input { flex: 1; border: 1px solid #ddd; padding: 12px; border-radius: 25px; outline: none; }
+        button { background: #1a73e8; color: white; border: none; padding: 0 20px; border-radius: 25px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <div id="header">مساعد Gemini AI</div>
+        <div id="messages"></div>
+        <div id="input-area">
+            <input type="text" id="userInput" placeholder="اكتب سؤالك هنا...">
+            <button onclick="send()">إرسال</button>
+        </div>
+    </div>
+
+    <script type="module">
+        // استدعاء مكتبة جوجل مباشرة من الشبكة لتجاوز الحاجة لـ Node.js
+        import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
+
+        // مفتاح الـ API الخاص بك
+        const genAI = new GoogleGenerativeAI("AIzaSyCgWl8vg_SxC51yop_a0S457S-lqyw_R2I");
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+        window.send = async () => {
+            const input = document.getElementById('userInput');
+            const box = document.getElementById('messages');
+            const text = input.value.trim();
+            if (!text) return;
+
+            // عرض رسالة المستخدم
+            box.innerHTML += `<div class="msg user">${text}</div>`;
+            input.value = '';
+            box.scrollTop = box.scrollHeight;
+
+            try {
+                // إرسال الطلب عبر الشبكة
+                const result = await model.generateContent(text);
+                const response = await result.response;
+                // عرض رد الذكاء الاصطناعي
+                box.innerHTML += `<div class="msg bot">${response.text()}</div>`;
+            } catch (e) {
+                box.innerHTML += `<div class="msg bot" style="color:red">فشل الاتصال: تأكد من تفعيل الـ VPN</div>`;
+            }
+            box.scrollTop = box.scrollHeight;
+        };
+    </script>
+</body>
+</html>
